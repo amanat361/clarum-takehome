@@ -8,8 +8,8 @@ export default async function StockPage({
   params: { symbol: string };
 }) {
   return (
-    <main className="max-w-4xl">
-      <Suspense fallback={<StockPageLoading />}>
+    <main className="max-w-4xl mt-20 mx-auto">
+      <Suspense fallback={<StockPageLoading symbol={params.symbol} />}>
         <StockViewer symbol={params.symbol} />
       </Suspense>
     </main>
