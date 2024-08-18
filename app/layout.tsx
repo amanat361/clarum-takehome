@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import LayoutWrapper from "@/components/SidebarLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,9 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={cn("min-h-screen antialiased", inter.className)}>
-        {children}
+    <html lang="en bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
+      <body className={cn("antialiased", inter.className)}>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

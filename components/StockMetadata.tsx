@@ -10,7 +10,11 @@ interface StockMetadataProps {
 const StockMetadata: React.FC<StockMetadataProps> = ({ metaData }) => {
   return (
     <div className="w-full">
-      <Heading level={2}>Stock Metadata for {metaData["2. Symbol"]}</Heading>
+      <Heading level={2}>Viewing stock data for ${metaData["2. Symbol"]}</Heading>
+      {/* <div className="flex items-center gap-4">
+        <Heading level={2}>Stock Metadata for</Heading>
+        <StockDropdown />
+      </div> */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
         <div>
           <Strong>Information:</Strong>

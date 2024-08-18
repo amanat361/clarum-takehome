@@ -5,7 +5,7 @@ interface StockChartProps {
 }
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
-  const width = 896; // Total width of the SVG
+  const width = 1000; // Total width of the SVG
   const height = 300; // Total height of the SVG
   const padding = 0; // Padding around the SVG
   const barWidth = Math.max(1, (width - 2 * padding) / data.length); // Dynamic bar width based on the number of data points

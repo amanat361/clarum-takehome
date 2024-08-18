@@ -1,6 +1,7 @@
-import StockViewer from "@/components/StockPage";
 import StockPageLoading from "@/components/loading/StockPageLoading";
+import StockViewer from "@/components/StockPage";
 import { Suspense } from "react";
+import { symbols } from "@/lib/symbols";
 
 export default async function StockPage({
   params,
@@ -8,30 +9,13 @@ export default async function StockPage({
   params: { symbol: string };
 }) {
   return (
-    <main className="max-w-4xl mt-20 mx-auto">
-      <Suspense fallback={<StockPageLoading symbol={params.symbol} />}>
-        <StockViewer symbol={params.symbol} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<StockPageLoading symbol={params.symbol} />}>
+      <StockViewer symbol={params.symbol} />
+    </Suspense>
   );
 }
 
 export async function generateStaticParams() {
-  const symbols = [
-    "AAPL",
-    "MSFT",
-    "AMZN",
-    "GOOGL",
-    "TSLA",
-    "FB",
-    "NFLX",
-    "GOOG",
-    "INTC",
-    "AMC",
-    "TWTR",
-    "IBM",
-  ];
-
   return symbols.map((symbol) => ({
     symbol,
   }));
