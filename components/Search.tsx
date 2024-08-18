@@ -8,7 +8,7 @@ export default function Search() {
     <form action={searchSymbol}>
       <InputGroup>
         <MagnifyingGlassIcon />
-        <Input placeholder="$SYMBOL" name="symbol" />
+        <Input placeholder="$SYMBOL" name="symbol" spellCheck="false" />
       </InputGroup>
     </form>
   );
