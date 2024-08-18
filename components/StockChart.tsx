@@ -1,59 +1,180 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+interface StockData {
+  date: string;
+  close: number;
+}
+
+interface ParsedStockData {
+  date: Date;
+  close: number;
+}
 
 interface StockChartProps {
-  data: { date: string; close: number }[];
+  data: StockData[];
 }
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
-  const width = 1000; // Total width of the SVG
-  const height = 300; // Total height of the SVG
-  const padding = 0; // Padding around the SVG
-  const barWidth = Math.max(1, (width - 2 * padding) / data.length); // Dynamic bar width based on the number of data points
+  const [width, setWidth] = useState(1000); // Initial width of the chart
+  const height = 400; // Total height of the SVG
+  const margin = { top: 20, right: 30, bottom: 50, left: 50 }; // Margins for the chart area
+  const chartRef = useRef<SVGSVGElement | null>(null);
 
-  // Get the maximum closing price for scaling
-  const maxClose = Math.max(...data.map((point) => point.close));
+  // Update width dynamically based on the size of the parent element
+  useEffect(() => {
+    const handleResize = () => {
+      if (chartRef.current) {
+        setWidth(chartRef.current.clientWidth);
+      }
+    };
 
-  // Scale function to map closing prices to SVG heights
-  const scaleY = (value: number) => (value / maxClose) * (height - 2 * padding);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+
+  // Parse the date format
+  const parseDate = (dateString: string) => new Date(dateString);
+  const parsedData: ParsedStockData[] = data.map((d) => ({
+    date: parseDate(d.date),
+    close: d.close,
+  }));
+
+  // Get min and max dates for X-axis
+  const minDate = Math.min(...parsedData.map((d) => d.date.getTime()));
+  const maxDate = Math.max(...parsedData.map((d) => d.date.getTime()));
+
+  // Get max closing price for Y-axis
+  const maxClose = Math.max(...parsedData.map((d) => d.close));
+
+  // X scale
+  const xScale = (date: Date) => {
+    const normalized = (date.getTime() - minDate) / (maxDate - minDate);
+    return margin.left + normalized * chartWidth;
+  };
+
+  // Y scale
+  const yScale = (close: number) => {
+    const normalized = close / maxClose;
+    return margin.top + (1 - normalized) * chartHeight;
+  };
+
+  // Generate ticks for X-axis (6 ticks)
+  const xTicks = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date(minDate + ((maxDate - minDate) / 5) * i);
+    return {
+      value: date,
+      xOffset: xScale(date) + chartWidth / parsedData.length / 2, // Shift ticks right to match bars
+      label: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+    };
+  });
+
+  // Generate ticks for Y-axis (6 ticks)
+  const yTicks = Array.from({ length: 6 }, (_, i) => {
+    const value = (maxClose / 5) * i;
+    return {
+      value,
+      yOffset: yScale(value),
+      label: value.toFixed(2),
+    };
+  });
 
   return (
-    <svg width={width} height={height}>
+    <svg ref={chartRef} width="100%" height={height}>
       {/* X-axis */}
       <line
-        x1={padding}
-        y1={height - padding}
-        x2={width - padding}
-        y2={height - padding}
-        stroke="black"
+        x1={margin.left}
+        y1={height - margin.bottom}
+        x2={width}
+        y2={height - margin.bottom}
+        stroke="currentColor"
+        className="text-black dark:text-white fill-current"
       />
       {/* Y-axis */}
       <line
-        x1={padding}
-        y1={padding}
-        x2={padding}
-        y2={height - padding}
-        stroke="black"
+        x1={margin.left}
+        y1={margin.top}
+        x2={margin.left}
+        y2={height - margin.bottom}
+        stroke="currentColor"
+        className="text-black dark:text-white fill-current"
       />
 
-      {/* Render bars */}
-      {data.map((point, index) => {
-        const barHeight = scaleY(point.close);
-        const x = padding + index * barWidth;
-        const y = height - padding - barHeight;
-
-        return (
-          <rect
-            key={index}
-            x={x}
-            y={y}
-            width={barWidth - 1} // Space between bars
-            height={barHeight}
-            fill="steelblue"
-            className="hover:fill-darkblue transition duration-200"
-            // title={`Date: ${point.date}, Close: ${point.close}`}
+      {/* X-axis ticks and labels */}
+      {xTicks.map((tick, index) => (
+        <g
+          key={index}
+          transform={`translate(${tick.xOffset}, ${height - margin.bottom})`}
+        >
+          <line
+            y2="6"
+            stroke="currentColor"
+            className="text-black dark:text-white fill-current"
           />
-        );
-      })}
+          <text
+            y="20"
+            textAnchor="middle"
+            className="text-black dark:text-white fill-current"
+            fontSize="10"
+          >
+            {tick.label}
+          </text>
+        </g>
+      ))}
+
+      {/* Y-axis ticks and labels */}
+      {yTicks.map((tick, index) => (
+        <g key={index} transform={`translate(${margin.left}, ${tick.yOffset})`}>
+          <line
+            x1="-6"
+            stroke="currentColor"
+            className="text-black dark:text-white fill-current"
+          />
+          <text
+            x="-10"
+            dy="0.32em"
+            textAnchor="end"
+            className="text-black dark:text-white fill-current"
+            fontSize="10"
+          >
+            {tick.label}
+          </text>
+        </g>
+      ))}
+
+      {/* Render bars */}
+      <g transform={`translate(0, ${margin.top})`}>
+        {parsedData.map((point, index) => {
+          const barWidth = chartWidth / parsedData.length;
+          const x = xScale(point.date);
+          const y = yScale(point.close);
+          const barHeight = chartHeight - (y - margin.top);
+
+          // Determine the color based on the previous bar's close value
+          const prevClose =
+            index > 0 ? parsedData[index - 1].close : point.close;
+          const color = point.close < prevClose ? "#c23650" : "#4bbf71";
+
+          return (
+            <rect
+              key={index}
+              x={x + 2} // Shift bars right
+              y={y - 22} // Shift bars up
+              width={barWidth - 2} // Space between bars
+              height={barHeight}
+              fill={color}
+              className="hover:fill-darkblue transition duration-200 ease-in-out"
+            />
+          );
+        })}
+      </g>
     </svg>
   );
 };
