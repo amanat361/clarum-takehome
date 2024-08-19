@@ -3,6 +3,21 @@
 import React, { useState } from "react";
 import { TimeSeriesData } from "@/types/stocks";
 import StockChart from "@/components/StockChart";
+import MiniStockChart from "@/components/MiniStockChart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import {
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/primitives/dialog";
 import { Button } from "./primitives/button";
 
 interface StockChartWrapperProps {
@@ -12,35 +27,70 @@ interface StockChartWrapperProps {
 const StockChartWrapper: React.FC<StockChartWrapperProps> = ({
   timeSeries,
 }) => {
-  const [numPoints, setNumPoints] = useState(100); // Default to 100 data points
+  const [numPoints, setNumPoints] = useState(100);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Format and filter data based on the number of data points
+  // Format data for the full chart
   const formattedData = Object.keys(timeSeries)
     .slice(0, numPoints)
     .map((date) => ({
       date,
       low: parseFloat(timeSeries[date]["3. low"]),
       high: parseFloat(timeSeries[date]["2. high"]),
-      open: parseFloat(timeSeries[date]["1. open"]), // Optional if you want to pass this
-      close: parseFloat(timeSeries[date]["4. close"]), // Optional if you want to pass this
-      volume: parseFloat(timeSeries[date]["5. volume"]), // Optional if you want to pass this
+      open: parseFloat(timeSeries[date]["1. open"]),
+      close: parseFloat(timeSeries[date]["4. close"]),
+      volume: parseFloat(timeSeries[date]["5. volume"]),
     }));
+
+  // Helper function to format data for mini charts
+  const formatMiniChartData = (points: number) =>
+    Object.keys(timeSeries)
+      .slice(0, points)
+      .map((date) => ({
+        date,
+        close: parseFloat(timeSeries[date]["4. close"]),
+      }));
+
+  // Handle opening the dialog with the selected number of points
+  const handleCardClick = (points: number) => {
+    setNumPoints(points);
+    setIsOpen(true);
+  };
 
   return (
     <div className="w-full flex flex-col gap-8 items-center">
-      <div className="flex space-x-2 w-full">
-        {[10, 50, 100, 500, 1000].map((points) => (
-          <Button
-            className="flex-1"
-            outline
+      <div className="grid grid-cols-3 gap-4 w-full">
+        {[10, 50, 100, 500, 1000, 5000].map((points) => (
+          <Card
             key={points}
-            onClick={() => setNumPoints(points)}
+            onClick={() => handleCardClick(points)}
+            className="cursor-pointer hover:bg-zinc-950/5 dark:hover:bg-white/5 transition-colors hover:border-zinc-950/15 dark:hover:border-white/15"
           >
-            Last {points} points
-          </Button>
+            <CardHeader>
+              <CardTitle>{`View ${points} data points`}</CardTitle>
+              <CardDescription></CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MiniStockChart data={formatMiniChartData(points)} />
+            </CardContent>
+          </Card>
         ))}
       </div>
-      <StockChart data={formattedData} />
+
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} size="3xl">
+        <DialogTitle>Stock Chart</DialogTitle>
+        <DialogDescription>
+          View the stock chart for the last {numPoints} data points.
+        </DialogDescription>
+        <DialogBody>
+          <StockChart data={formattedData} />
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={() => setIsOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

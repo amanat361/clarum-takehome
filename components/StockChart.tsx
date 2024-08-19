@@ -15,12 +15,13 @@ interface StockChartProps {
   data: FormattedStockData[];
 }
 
+// Define chart configuration
 const keys = ["low", "open", "close", "high"];
-  const height = 500;
-  const marginTop = 20;
-  const marginRight = 20;
-  const marginBottom = 30;
-  const marginLeft = 40;
+const height = 400;
+const marginTop = 20;
+const marginRight = 20;
+const marginBottom = 30;
+const marginLeft = 40;
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -29,23 +30,27 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
   );
 
   useEffect(() => {
+    // Ensure there is data and a valid SVG element to draw the chart
     if (!data || !svgRef.current) return;
     if (!svgRef.current.parentElement) return;
 
+    // Calculate the width based on parent element
     const width = svgRef.current.parentElement.clientWidth || 928;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
+    // Set up the SVG canvas dimensions
     svg
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet");
 
+    // Determine maximum height for the stack
     const maxStackHeight = (d3.max(data, (d) => d.high) || 0) + marginBottom;
 
-    // Prepare the scales
+    // Define the scales for the chart
     const x = d3
       .scaleBand()
       .domain(data.map((d) => d.date))
@@ -54,16 +59,16 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
 
     const y = d3
       .scaleLinear()
-      .domain([0, maxStackHeight]) // Adjust domain to the max stack height
+      .domain([0, maxStackHeight])
       .range([height - marginBottom, marginTop]);
 
-    // Color scheme depending on dark mode
+    // Define color scale based on mode
     const color = d3
       .scaleOrdinal()
       .domain(keys)
       .range(["#22d3ee", "#0891b2", "#155e75", "#083344"]);
 
-    // Create stack generator
+    // Stack the data based on keys
     const stackGenerator = d3
       .stack()
       .keys(keys)
@@ -82,10 +87,9 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
         }
       });
 
-    // Stack the data
     const series = stackGenerator(data as Iterable<{ [key: string]: number }>);
 
-    // Append the y-axis grid lines first (so they are behind the bars)
+    // Append y-axis grid lines
     svg
       .append("g")
       .attr("transform", `translate(${marginLeft},0)`)
@@ -94,17 +98,17 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
         d3
           .axisLeft(y)
           .ticks(5)
-          .tickSize(-width + marginLeft + marginRight) // Extend ticks across the chart for grid lines
+          .tickSize(-width + marginLeft + marginRight)
           //@ts-ignore
           .tickFormat("")
       )
-      .call((g) => g.select(".domain").remove()) // Ensure no top axis line is shown
+      .call((g) => g.select(".domain").remove())
       .call((g) =>
         g.selectAll(".tick line").attr("stroke", "#aaa").attr("opacity", 0.5)
-      ); // Soften the grid lines
+      );
 
-    // Append the x-axis grid lines aligned with the visible ticks
-    const numTicks = Math.max(1, Math.floor(data.length / 10));
+    // Append x-axis grid lines
+    const numTicks = Math.max(1, Math.floor(data.length / 5));
     const visibleTicks = x.domain().filter((d, i) => !(i % numTicks));
 
     svg
@@ -119,18 +123,16 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
           //@ts-ignore
           .tickFormat("")
       )
-      .call((g) => g.select(".domain").remove()) // Remove the bottom border of the x-axis
-      .call(
-        (g) =>
-          g
-            .selectAll(".tick line")
-            .attr("stroke", "#aaa")
-            .attr("opacity", 0.5)
-            .attr("transform", `translate(-${x.bandwidth() / 2}, 0)`) // Shift the lines to the left by half the bar width
+      .call((g) => g.select(".domain").remove())
+      .call((g) =>
+        g
+          .selectAll(".tick line")
+          .attr("stroke", "#aaa")
+          .attr("opacity", 0.5)
+          .attr("transform", `translate(-${x.bandwidth() / 2}, 0)`)
       );
 
-
-    // Now append the bars, which will be on top of the grid lines
+    // Append stacked bars to the chart
     const layer = svg
       .append("g")
       .selectAll("g")
@@ -138,32 +140,32 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
       .join("g")
       .attr("fill", (d) => color(d.key) as string);
 
-    const maxDelay = 2000; // Max total delay for the entire wave effect
-    const delayPerBar = Math.min(maxDelay / data.length, 50); // Scale delay by data length
+    const maxDelay = 2000;
+    const delayPerBar = Math.min(maxDelay / data.length, 50);
 
     layer
       .selectAll("rect")
       .data((d) => d)
       .join("rect")
       .attr("x", (d, i) => x(data[i].date) || 0)
-      .attr("y", height - marginBottom) // Start at the bottom
-      .attr("height", 0) // Start with height 0
+      .attr("y", height - marginBottom)
+      .attr("height", 0)
       .attr("width", x.bandwidth())
       .transition()
       .duration(800)
-      .delay((d, i) => i * delayPerBar) // Stagger transitions by calculated delay
+      .delay((d, i) => i * delayPerBar)
       .ease(d3.easeCubicInOut)
-      .attr("y", (d) => y(d[1])) // Transition to final y position
-      .attr("height", (d) => y(d[0]) - y(d[1])); // Transition to final height
+      .attr("y", (d) => y(d[1]))
+      .attr("height", (d) => y(d[0]) - y(d[1]));
 
-    // Add the x-axis labels on top of the bars
+    // Append x-axis labels on top of the bars
     svg
       .append("g")
       .attr("transform", `translate(0,${height - marginBottom})`)
       .call(d3.axisBottom(x).tickValues(visibleTicks))
-      .call((g) => g.select(".domain").remove()); // Remove the bottom border of the x-axis
+      .call((g) => g.select(".domain").remove());
 
-    // Add the y-axis with a left axis line (remove the right line if added)
+    // Append y-axis on the left side
     svg
       .append("g")
       .attr("transform", `translate(${marginLeft},0)`)
@@ -172,14 +174,15 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
         g
           .select(".domain")
           .attr("stroke", isDarkMode.current ? "#fff" : "black")
-      ); // Ensure the left axis line color
+      );
   }, [data]);
 
   useEffect(() => {
+    // Listen for changes in color scheme (dark mode)
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
       isDarkMode.current = e.matches;
-      // Re-run the effect to update the chart
+      // Re-render the chart on color scheme change
       if (svgRef.current) {
         svgRef.current.innerHTML = "";
         const x = d3
@@ -187,7 +190,6 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
           .domain(data.map((d) => d.date))
           .range([marginLeft, svgRef.current.clientWidth - marginRight])
           .padding(0.1);
-        // Trigger re-rendering
         //@ts-ignore
         d3.select(svgRef.current).call(d3.axisBottom(x).tickFormat(""));
       }
@@ -199,11 +201,11 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
     };
   }, [data]);
 
-
+  // Render the legend
   const renderLegend = () => {
     const colors = isDarkMode.current
-      ? ["#22d3ee", "#0891b2", "#155e75", "#083344"] // Colors for dark mode
-      : ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]; // Colors for light mode
+      ? ["#22d3ee", "#0891b2", "#155e75", "#083344"]
+      : ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"];
 
     return keys.map((key, index) => (
       <div key={key} className="flex items-center gap-2">
@@ -217,9 +219,9 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
   };
 
   return (
-    <div className="w-full p-4 bg-white text-black dark:bg-zinc-900 dark:text-white">
+    <div className="w-full bg-white text-black dark:bg-zinc-900 dark:text-white">
       <div className="flex justify-between mb-4">
-        <h2 className="text-2xl font-bold">Stock Price Chart</h2>
+        <h2 className="text-2xl font-bold"></h2>
         <div className="flex gap-4">{renderLegend()}</div>
       </div>
       <svg ref={svgRef} className="w-full h-auto" />
