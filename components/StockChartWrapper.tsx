@@ -14,14 +14,16 @@ const StockChartWrapper: React.FC<StockChartWrapperProps> = ({
 }) => {
   const [numPoints, setNumPoints] = useState(100); // Default to 100 data points
 
-  console.log(Object.keys(timeSeries).length);
-
   // Format and filter data based on the number of data points
   const formattedData = Object.keys(timeSeries)
     .slice(0, numPoints)
     .map((date) => ({
       date,
-      close: parseFloat(timeSeries[date]["4. close"]),
+      low: parseFloat(timeSeries[date]["3. low"]),
+      high: parseFloat(timeSeries[date]["2. high"]),
+      open: parseFloat(timeSeries[date]["1. open"]), // Optional if you want to pass this
+      close: parseFloat(timeSeries[date]["4. close"]), // Optional if you want to pass this
+      volume: parseFloat(timeSeries[date]["5. volume"]), // Optional if you want to pass this
     }));
 
   return (

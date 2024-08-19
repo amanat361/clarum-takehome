@@ -36,9 +36,14 @@ async function generateRandomStockData({ symbol }: { symbol: string }): Promise<
   };
 
   const generateRandomTimeSeriesData = (): TimeSeriesData => {
+    // const open = "150";
+    // const high = "200";
+    // const low = "100";
+    // const close = "180";
+    // const volume = "1000";
     const open = getRandomNumber(100, 200).toFixed(2);
-    const high = (parseFloat(open) + getRandomNumber(0, 10)).toFixed(2);
-    const low = (parseFloat(open) - getRandomNumber(0, 10)).toFixed(2);
+    const high = (parseFloat(open) + getRandomNumber(0, 50)).toFixed(2);
+    const low = (parseFloat(open) - getRandomNumber(0, 50)).toFixed(2);
     const close = getRandomNumber(parseFloat(low), parseFloat(high)).toFixed(2);
     const volume = Math.floor(getRandomNumber(1000, 10000)).toString();
 
