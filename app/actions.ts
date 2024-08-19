@@ -25,7 +25,8 @@ export async function searchSymbol(formData: FormData) {
 
 async function generateRandomStockData({ symbol }: { symbol: string }): Promise<StockData> {
   // simulate a delay
-  // await new Promise((resolve) => setTimeout(resolve, 4000));
+  const delay = Math.random() * 1000;
+  await new Promise((resolve) => setTimeout(resolve, delay));
 
   const getRandomNumber = (min: number, max: number): number => {
     return Math.random() * (max - min) + min;
@@ -36,11 +37,6 @@ async function generateRandomStockData({ symbol }: { symbol: string }): Promise<
   };
 
   const generateRandomTimeSeriesData = (): TimeSeriesData => {
-    // const open = "150";
-    // const high = "200";
-    // const low = "100";
-    // const close = "180";
-    // const volume = "1000";
     const open = getRandomNumber(100, 200).toFixed(2);
     const high = (parseFloat(open) + getRandomNumber(0, 50)).toFixed(2);
     const low = (parseFloat(open) - getRandomNumber(0, 50)).toFixed(2);

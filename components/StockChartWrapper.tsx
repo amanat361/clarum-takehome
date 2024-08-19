@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/primitives/dialog";
 import { Button } from "./primitives/button";
+import { Heading } from "./primitives/heading";
 
 interface StockChartWrapperProps {
   timeSeries: { [date: string]: TimeSeriesData };
@@ -67,7 +68,7 @@ const StockChartWrapper: React.FC<StockChartWrapperProps> = ({
             className="cursor-pointer hover:bg-zinc-950/5 dark:hover:bg-white/5 transition-colors hover:border-zinc-950/15 dark:hover:border-white/15"
           >
             <CardHeader>
-              <CardTitle>{`View ${points} data points`}</CardTitle>
+              <Heading>{`${points} data points`}</Heading>
               <CardDescription></CardDescription>
             </CardHeader>
             <CardContent>

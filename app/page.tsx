@@ -1,21 +1,44 @@
-import { StockData } from "@/types/stocks";
-import StockMetadata from "@/components/StockMetadata";
-import StockChartWrapper from "@/components/StockChartWrapper";
-import { fetchStockData } from "./actions";
+import { Heading } from "@/components/primitives/heading";
+import StockViewer from "@/components/StockViewer";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 export default async function Home() {
-  const SYMBOLS = ["AAPL", "MSFT", "AMZN", "GOOG", "TSLA", "META", "NFLX", "GOOG", "INTC", "AMC", "TWTR", "IBM"];
-  
-  const allStockData = await Promise.all(SYMBOLS.map(fetchStockData));
-  const stockData = allStockData[2];
-
-  const metaData = stockData["Meta Data"];
-  const timeSeries = stockData["Time Series (Daily)"];
+  const SYMBOLS = [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "GOOG",
+    "TSLA",
+    "META",
+    "NFLX",
+    "GOOG",
+    "INTC",
+    "AMC",
+    "TWTR",
+    "IBM",
+    "TMUS",
+    "SBUX",
+    "BABA",
+    "DIS",
+    "T",
+    "AMD",
+    "RACE",
+    "WORK"
+  ];
 
   return (
-    <main className="flex flex-col items-center h-screen justify-center gap-8 max-w-4xl m-auto">
-      <StockMetadata metaData={metaData} />
-      <StockChartWrapper timeSeries={timeSeries} />
-    </main>
+    <div className="w-full flex flex-col gap-8 p-8">
+      <main className="grid grid-cols-4 gap-4 w-full">
+        {SYMBOLS.map((symbol) => (
+          <Suspense
+            key={symbol}
+            fallback={<Skeleton className="w-full h-[120px]" />}
+          >
+            <StockViewer key={symbol} symbol={symbol} />
+          </Suspense>
+        ))}
+      </main>
+    </div>
   );
 }

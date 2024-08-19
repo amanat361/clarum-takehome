@@ -11,7 +11,7 @@ const MiniStockChart: React.FC<MiniStockChartProps> = ({ data }) => {
   useEffect(() => {
     if (!data || !svgRef.current) return;
 
-    const width = 300; // Fixed width for mini chart
+    const width = 175; // Fixed width for mini chart
     const height = 80; // Fixed height for mini chart
     const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 
