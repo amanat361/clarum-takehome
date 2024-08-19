@@ -4,6 +4,7 @@ import StockViewer from "@/components/StockViewer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 import { symbols } from "@/lib/symbols";
+import { Button } from "@/components/primitives/button";
 
 export default async function Home() {
 
