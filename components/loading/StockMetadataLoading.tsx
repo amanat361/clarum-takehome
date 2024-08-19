@@ -1,6 +1,4 @@
 import { Heading } from "../primitives/heading";
-import { Strong } from "../primitives/text";
-import { Skeleton } from "../ui/skeleton";
 
 export default function StockMetadataLoading({symbol}: {symbol: string}) {
   return (

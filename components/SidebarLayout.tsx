@@ -3,7 +3,6 @@
 import {
   Sidebar,
   SidebarBody,
-  SidebarDivider,
   SidebarFooter,
   SidebarHeader,
   SidebarHeading,
@@ -13,10 +12,9 @@ import {
 } from "@/components/primitives/sidebar";
 import { SidebarLayout } from "@/components/primitives/sidebar-layout";
 import { symbols } from "@/lib/symbols";
-import { Input } from "./primitives/input";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Search from "./Search";
-import { ChartBarIcon, CurrencyDollarIcon, HomeIcon } from "@heroicons/react/16/solid";
+import { ChartBarIcon, HomeIcon } from "@heroicons/react/16/solid";
 
 export default function LayoutWrapper({
   children,

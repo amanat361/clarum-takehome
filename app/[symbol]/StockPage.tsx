@@ -1,6 +1,5 @@
 import { fetchStockData } from "@/app/actions";
 import { Text } from "@/components/primitives/text";
-import { Button } from "@/components/primitives/button";
 import StockChartWrapper from "./StockPageChartWrapper";
 import StockMetadata from "@/components/StockMetadata";
 import { Heading } from "@/components/primitives/heading";

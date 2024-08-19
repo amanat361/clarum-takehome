@@ -3,30 +3,10 @@ import { Text } from "@/components/primitives/text";
 import StockViewer from "@/components/StockViewer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+import { symbols } from "@/lib/symbols";
 
 export default async function Home() {
-  const SYMBOLS = [
-    "AAPL",
-    "MSFT",
-    "AMZN",
-    "GOOG",
-    "TSLA",
-    "META",
-    "NFLX",
-    "GOOG",
-    "INTC",
-    "AMC",
-    "TWTR",
-    "IBM",
-    "TMUS",
-    "SBUX",
-    "BABA",
-    "DIS",
-    "T",
-    "AMD",
-    "RACE",
-    "WORK",
-  ];
+
 
   return (
     <div className="w-full flex flex-col gap-8">
@@ -35,7 +15,7 @@ export default async function Home() {
         <Text>Made with ❤️ by Sam for Clarum</Text>
       </div>
       <main className="grid grid-cols-5 gap-4 w-full">
-        {SYMBOLS.map((symbol) => (
+        {symbols.map((symbol) => (
           <Suspense
             key={symbol}
             fallback={<Skeleton className="w-full h-[40px]" />}

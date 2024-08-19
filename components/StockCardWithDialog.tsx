@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Text } from "./primitives/text";
 import StockChartWrapper from "./StockChartWrapper";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   Dialog,
   DialogActions,
@@ -13,7 +11,6 @@ import {
 } from "@/components/primitives/dialog";
 import { Button } from "./primitives/button";
 import { MetaData, TimeSeriesData } from "@/types/stocks";
-import { Heading } from "./primitives/heading";
 
 interface StockCardWithDialogProps {
   metaData: MetaData
@@ -33,7 +30,6 @@ const StockCardWithDialog: React.FC<StockCardWithDialogProps> = ({
     <>
       <Button onClick={() => setIsOpen(true)}>View Chart for ${stockName}</Button>
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} size="3xl">
-        {/* <StockMetadata metaData={metaData} /> */}
         <DialogTitle>Viewing detailed stock information for ${stockName}</DialogTitle> 
         <DialogDescription>
           Last Refreshed: {lastRefreshed}

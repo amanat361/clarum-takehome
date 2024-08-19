@@ -1,6 +1,6 @@
 import React from "react";
 import { MetaData } from "@/types/stocks";
-import { Strong, Text } from "@/components/primitives/text";
+import { Text } from "@/components/primitives/text";
 import { Heading } from "./primitives/heading";
 
 interface StockMetadataProps {

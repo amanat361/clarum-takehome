@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { TimeSeriesData } from "@/types/stocks";
 import StockChart from "@/components/StockChart";
 import { Button } from "@/components/primitives/button";
-import { Heading } from "@/components/primitives/heading";
 
 interface StockChartWrapperProps {
   timeSeries: { [date: string]: TimeSeriesData };
