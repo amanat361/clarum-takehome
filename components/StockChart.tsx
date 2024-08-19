@@ -21,7 +21,7 @@ const marginTop = 20;
 const marginRight = 20;
 const marginBottom = 30;
 const marginLeft = 40;
-const maxBars = 100; // Maximum number of bars to display
+const maxBars = 50; // Maximum number of bars to display
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
   const svgRef = useRef<SVGSVGElement>(null);

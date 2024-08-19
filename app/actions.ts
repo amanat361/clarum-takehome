@@ -3,12 +3,12 @@
 import { StockData, TimeSeriesData } from "@/types/stocks";
 import { redirect } from "next/navigation";
 
+// for some reason using the fake API key actually works LOL
+// the real one is not under NEXT_PUBLIC but if it works it works
 const API_KEY = process.env.NEXT_PUBLIC_ALPHAVANTAGE_API_KEY;
 const SYMBOL_URL = (symbol: string) => `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=full&apikey=${API_KEY}`;
 
 export async function fetchStockData(symbol: string): Promise<StockData> {
-  // simulate a delay
-  // await new Promise((resolve) => setTimeout(resolve, 4000));
   const url = SYMBOL_URL(symbol);
   const response = await fetch(url);
   const data: StockData = await response.json();
