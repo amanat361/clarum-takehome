@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { Badge } from "./primitives/badge";
 
 interface FormattedStockData {
   date: string;
@@ -22,12 +21,44 @@ const marginTop = 20;
 const marginRight = 20;
 const marginBottom = 30;
 const marginLeft = 40;
+const maxBars = 100; // Maximum number of bars to display
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const isDarkMode = useRef(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
+
+  // Function to reduce the data by averaging every N points
+  const reduceData = (data: FormattedStockData[], targetLength: number) => {
+    const reduceFactor = Math.ceil(data.length / targetLength);
+    const reducedData: FormattedStockData[] = [];
+
+    for (let i = 0; i < data.length; i += reduceFactor) {
+      const chunk = data.slice(i, i + reduceFactor);
+      const averageData = chunk.reduce(
+        (acc, curr) => ({
+          date: curr.date, // Use the last date in the chunk
+          low: acc.low + curr.low / chunk.length,
+          high: acc.high + curr.high / chunk.length,
+          open: acc.open + curr.open / chunk.length,
+          close: acc.close + curr.close / chunk.length,
+          volume: acc.volume + curr.volume / chunk.length,
+        }),
+        {
+          date: chunk[chunk.length - 1].date,
+          low: 0,
+          high: 0,
+          open: 0,
+          close: 0,
+          volume: 0,
+        }
+      );
+      reducedData.push(averageData);
+    }
+
+    return reducedData;
+  };
 
   useEffect(() => {
     // Ensure there is data and a valid SVG element to draw the chart
@@ -36,6 +67,9 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
 
     // Calculate the width based on parent element
     const width = svgRef.current.parentElement.clientWidth || 928;
+
+    // Check if data needs to be reduced
+    const chartData = data.length > maxBars ? reduceData(data, maxBars) : data;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -48,12 +82,13 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
       .attr("preserveAspectRatio", "xMidYMid meet");
 
     // Determine maximum height for the stack
-    const maxStackHeight = (d3.max(data, (d) => d.high) || 0) + marginBottom;
+    const maxStackHeight =
+      (d3.max(chartData, (d) => d.high) || 0) + marginBottom;
 
     // Define the scales for the chart
     const x = d3
       .scaleBand()
-      .domain(data.map((d) => d.date))
+      .domain(chartData.map((d) => d.date).reverse())
       .range([marginLeft, width - marginRight])
       .padding(0.1);
 
@@ -87,7 +122,9 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
         }
       });
 
-    const series = stackGenerator(data as Iterable<{ [key: string]: number }>);
+    const series = stackGenerator(
+      chartData as Iterable<{ [key: string]: number }>
+    );
 
     // Append y-axis grid lines
     svg
@@ -108,7 +145,7 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
       );
 
     // Append x-axis grid lines
-    const numTicks = Math.max(1, Math.floor(data.length / 5));
+    const numTicks = Math.max(1, Math.floor(chartData.length / 5));
     const visibleTicks = x.domain().filter((d, i) => !(i % numTicks));
 
     svg
@@ -141,13 +178,13 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
       .attr("fill", (d) => color(d.key) as string);
 
     const maxDelay = 2000;
-    const delayPerBar = Math.min(maxDelay / data.length, 50);
+    const delayPerBar = Math.min(maxDelay / chartData.length, 50);
 
     layer
       .selectAll("rect")
       .data((d) => d)
       .join("rect")
-      .attr("x", (d, i) => x(data[i].date) || 0)
+      .attr("x", (d, i) => x(chartData[i].date) || 0)
       .attr("y", height - marginBottom)
       .attr("height", 0)
       .attr("width", x.bandwidth())
@@ -203,9 +240,7 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
 
   // Render the legend
   const renderLegend = () => {
-    const colors = isDarkMode.current
-      ? ["#22d3ee", "#0891b2", "#155e75", "#083344"]
-      : ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"];
+    const colors = ["#22d3ee", "#0891b2", "#155e75", "#083344"];
 
     return keys.map((key, index) => (
       <div key={key} className="flex items-center gap-2">

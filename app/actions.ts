@@ -9,10 +9,10 @@ const SYMBOL_URL = (symbol: string) => `https://www.alphavantage.co/query?functi
 export async function fetchStockData(symbol: string): Promise<StockData> {
   // simulate a delay
   // await new Promise((resolve) => setTimeout(resolve, 4000));
-  // const url = SYMBOL_URL(symbol);
-  // const response = await fetch(url);
-  // const data: StockData = await response.json();
-  const data = await generateRandomStockData({ symbol });
+  const url = SYMBOL_URL(symbol);
+  const response = await fetch(url);
+  const data: StockData = await response.json();
+  // const data = await generateRandomStockData({ symbol });
   return data;
 }
 

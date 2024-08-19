@@ -13,6 +13,7 @@ import {
 } from "@/components/primitives/dialog";
 import { Button } from "./primitives/button";
 import { MetaData, TimeSeriesData } from "@/types/stocks";
+import { Heading } from "./primitives/heading";
 
 interface StockCardWithDialogProps {
   metaData: MetaData
@@ -30,19 +31,7 @@ const StockCardWithDialog: React.FC<StockCardWithDialogProps> = ({
 
   return (
     <>
-      <Card
-        onClick={() => setIsOpen(true)}
-        className="cursor-pointer hover:bg-zinc-950/5 dark:hover:bg-white/5 transition-colors hover:border-zinc-950/15 dark:hover:border-white/15"
-      >
-        <CardHeader>
-          <CardTitle>{stockName}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Text>Last Refreshed: {lastRefreshed}</Text>
-          {/* Optionally, add a mini chart preview here */}
-        </CardContent>
-      </Card>
-
+      <Button onClick={() => setIsOpen(true)}>View Chart for ${stockName}</Button>
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} size="3xl">
         {/* <StockMetadata metaData={metaData} /> */}
         <DialogTitle>Viewing detailed stock information for ${stockName}</DialogTitle> 
