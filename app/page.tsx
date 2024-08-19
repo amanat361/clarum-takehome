@@ -25,14 +25,14 @@ export default async function Home() {
     "T",
     "AMD",
     "RACE",
-    "WORK"
+    "WORK",
   ];
 
   return (
     <div className="w-full flex flex-col gap-8">
       <div className="flex justify-between items-center w-full gap-4 border-b border-zinc-950/10 pb-4 dark:border-white/10">
-      <Heading level={2}>Hey there!</Heading>
-      <Text>Made with ❤️ by Sam for Clarum</Text>
+        <Heading level={2}>Hey there!</Heading>
+        <Text>Made with ❤️ by Sam for Clarum</Text>
       </div>
       <main className="grid grid-cols-5 gap-4 w-full">
         {SYMBOLS.map((symbol) => (

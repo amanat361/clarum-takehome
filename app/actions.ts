@@ -12,7 +12,10 @@ export async function fetchStockData(symbol: string): Promise<StockData> {
   const url = SYMBOL_URL(symbol);
   const response = await fetch(url);
   const data: StockData = await response.json();
-  // const data = await generateRandomStockData({ symbol });
+  if (data["Error Message"] || !data["Time Series (Daily)"] || !data["Meta Data"]) {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return await generateRandomStockData({ symbol });
+  }
   return data;
 }
 

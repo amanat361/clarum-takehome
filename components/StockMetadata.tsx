@@ -9,34 +9,11 @@ interface StockMetadataProps {
 
 const StockMetadata: React.FC<StockMetadataProps> = ({ metaData }) => {
   return (
-    <div className="w-full">
-      <Heading level={2}>Viewing stock data for ${metaData["2. Symbol"]}</Heading>
-      {/* <div className="flex items-center gap-4">
-        <Heading level={2}>Stock Metadata for</Heading>
-        <StockDropdown />
-      </div> */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-        <div>
-          <Strong>Information:</Strong>
-          <Text>{metaData["1. Information"]}</Text>
-        </div>
-        <div>
-          <Strong>Symbol:</Strong>
-          <Text>{metaData["2. Symbol"]}</Text>
-        </div>
-        <div>
-          <Strong>Last Refreshed:</Strong>
-          <Text>{metaData["3. Last Refreshed"]}</Text>
-        </div>
-        <div>
-          <Strong>Output Size:</Strong>
-          <Text>{metaData["4. Output Size"]}</Text>
-        </div>
-        <div>
-          <Strong>Time Zone:</Strong>
-          <Text>{metaData["5. Time Zone"]}</Text>
-        </div>
-      </div>
+    <div className="flex justify-between items-center w-full gap-4 border-b border-zinc-950/10 pb-4 dark:border-white/10">
+      <Heading level={2}>
+        Viewing stock data for ${metaData["2. Symbol"]}
+      </Heading>
+      <Text>Last Refreshed: {metaData["3. Last Refreshed"]}</Text>
     </div>
   );
 };
