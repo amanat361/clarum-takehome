@@ -26,7 +26,7 @@ const MiniStockChart: React.FC<MiniStockChartProps> = ({ data }) => {
 
     const x = d3
       .scaleBand()
-      .domain(data.map((d) => d.date))
+      .domain(data.map((d) => d.date).reverse())
       .range([margin.left, width - margin.right]);
 
     const y = d3
