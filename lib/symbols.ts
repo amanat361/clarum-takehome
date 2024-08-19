@@ -2,7 +2,7 @@ export const symbols = [
   "AAPL",
   "MSFT",
   "AMZN",
-  "GOOG",
+  "TPVG",
   "TSLA",
   "META",
   "NFLX",
