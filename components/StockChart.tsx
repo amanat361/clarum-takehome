@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { useWindow } from "@/hooks/useWindow";
 
 interface FormattedStockData {
   date: string;
@@ -27,8 +28,11 @@ const maxBars = 50; // Maximum number of bars to display
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const clientWindow = useWindow();
   const isDarkMode = useRef(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
+    clientWindow
+      ? clientWindow.matchMedia("(prefers-color-scheme: dark)").matches
+      : false
   );
 
   // Function to reduce the data by averaging every N points
