@@ -53,7 +53,7 @@ export default function Chart({ data }: { data: ChartData[] }) {
     <div className="relative h-96 w-full" ref={ref}>
       {bounds.width > 0 && (
         <ChartInner
-          data={reduceData(data, 50)}
+          data={reduceData(data, 100)}
           width={bounds.width}
           height={bounds.height}
           key={data.length}
