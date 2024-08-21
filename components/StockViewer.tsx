@@ -15,8 +15,7 @@ export default async function StockViewer({ symbol }: { symbol: string }) {
   const timeSeries = stockData["Time Series (Daily)"];
 
   if (!metaData || !timeSeries) {
-    return <Button disabled>Could not load ${symbol}</Button>;
-  }
+    return <Button disabled>Could not load ${symbol}</Button>  }
 
   return <StockCardWithDialog metaData={metaData} timeSeries={timeSeries} />;
 }
