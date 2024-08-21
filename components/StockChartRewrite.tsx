@@ -120,11 +120,6 @@ function ChartInner({ data, width, height }: ChartInnerProps) {
   const numXTicks = Math.max(1, Math.floor(data.length / 5));
   const visibleXTicks = xScale.domain().filter((d, i) => !(i % numXTicks));
 
-  console.log(series);
-
-  const maxDelay = 2000;
-  const delayPerBar = 1;
-
   return (
     <>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
@@ -180,27 +175,22 @@ function ChartInner({ data, width, height }: ChartInnerProps) {
                 key={i}
                 initial={{ height: 0 }}
                 animate={{
-                  height: yScale(d[0]) - yScale(d[1]),
+                  height: yScale(d[0]) - yScale(d[1]) + ((selectedIndex === i) ? 15 : 0),
+                  translateY: (selectedIndex === i) ? -15 * (j + 1) : 0,
                 }}
                 y={yScale(d[1])}
                 height={yScale(d[0]) - yScale(d[1])}
                 x={xScale(data[i].date) || 0}
                 width={xScale.bandwidth()}
                 transition={{
-                  duration: 0.5,
-                  delay: j * 0.3 + i * 0.01,
+                  duration: 0.2,
+                  delay: selectedIndex ? 0 : j * 0.3 + i * 0.01,
                   type: "tween",
                 }}
                 fill={colors[j]}
+                stroke={selectedIndex === i ? "currentColor" : colors[j]}
+                className="text-black dark:text-white cursor-pointer"
                 onHoverStart={() => setSelectedIndex(i)}
-                // whileHover={j === 0 ? {
-                //   fill: "white",
-                //   transition: {
-                //     duration: 0,
-                //     delay: 0,
-                //     type: "tween",
-                //   },
-                // } : {}}
               />
             ))}
           </motion.g>
