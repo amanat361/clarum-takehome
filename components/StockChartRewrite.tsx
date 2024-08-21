@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import useMeasure from "react-use-measure";
 import { motion } from "framer-motion";
 import { Text } from "./primitives/text";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ChartData {
   date: string;
@@ -17,6 +17,7 @@ const keys = ["low", "open", "close", "high"] as const;
 
 export default function Chart({ data }: { data: ChartData[] }) {
   const [ref, bounds] = useMeasure();
+  const [reducedData, setReducedData] = useState<ChartData[]>([]);
 
   // Function to reduce the data by averaging every N points
   const reduceData = (data: ChartData[], targetLength: number) => {
@@ -49,27 +50,40 @@ export default function Chart({ data }: { data: ChartData[] }) {
     return reducedData;
   };
 
+  useEffect(() => {
+    setReducedData(reduceData(data, 100));
+  }, [data]);
+
+  const handleDeleteDataPoint = (dataPoint: ChartData) => {
+    if (reducedData.length <= 1) return;
+    setReducedData(reducedData.filter((d) => d.date !== dataPoint.date));
+  };
+
   return (
-    <div className="relative h-96 w-full" ref={ref}>
-      {bounds.width > 0 && (
-        <ChartInner
-          data={reduceData(data, 100)}
-          width={bounds.width}
-          height={bounds.height}
-          key={data.length}
-        />
-      )}
-    </div>
+    <>
+      <div className="relative h-96 w-full" ref={ref}>
+        {bounds.width > 0 && (
+          <ChartInner
+            deleteDataPoint={handleDeleteDataPoint}
+            data={reducedData}
+            width={bounds.width}
+            height={bounds.height}
+            key={data.length}
+          />
+        )}
+      </div>
+    </>
   );
 }
 
 interface ChartInnerProps {
+  deleteDataPoint: (dataPoint: ChartData) => void;
   data: ChartData[];
   width: number;
   height: number;
 }
 
-function ChartInner({ data, width, height }: ChartInnerProps) {
+function ChartInner({ deleteDataPoint, data, width, height }: ChartInnerProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   let margin = {
@@ -91,11 +105,6 @@ function ChartInner({ data, width, height }: ChartInnerProps) {
     .range([height - margin.bottom, margin.top]);
 
   const colors = ["#22d3ee", "#0891b2", "#155e75", "#083344"];
-
-  const colorScale = d3
-    .scaleOrdinal()
-    .domain(keys)
-    .range(["#22d3ee", "#0891b2", "#155e75", "#083344"]);
 
   const stackGenerator = d3
     .stack()
@@ -175,22 +184,28 @@ function ChartInner({ data, width, height }: ChartInnerProps) {
                 key={i}
                 initial={{ height: 0 }}
                 animate={{
-                  height: yScale(d[0]) - yScale(d[1]) + ((selectedIndex === i) ? 15 : 0),
-                  translateY: (selectedIndex === i) ? -15 * (j + 1) : 0,
+                  height: Math.max(
+                    yScale(d[0]) -
+                      yScale(d[1]) +
+                      (selectedIndex === i ? 15 : 0),
+                    0
+                  ),
+                  translateY: selectedIndex === i ? -15 * (j + 1) : 0,
                 }}
                 y={yScale(d[1])}
-                height={yScale(d[0]) - yScale(d[1])}
+                height={Math.max(yScale(d[0]) - yScale(d[1]), 0)}
                 x={xScale(data[i].date) || 0}
                 width={xScale.bandwidth()}
                 transition={{
-                  duration: 0.2,
-                  delay: selectedIndex ? 0 : j * 0.3 + i * 0.01,
+                  duration: (selectedIndex !== null && selectedIndex !== i) ? 0 : 0.2,
+                  delay: selectedIndex !== null ? 0 : j * 0.3 + i * 0.01,
                   type: "tween",
                 }}
                 fill={colors[j]}
                 stroke={selectedIndex === i ? "currentColor" : colors[j]}
                 className="text-black dark:text-white cursor-pointer"
                 onHoverStart={() => setSelectedIndex(i)}
+                onClick={() => deleteDataPoint(data[i])}
               />
             ))}
           </motion.g>
@@ -213,20 +228,34 @@ function ChartInner({ data, width, height }: ChartInnerProps) {
             </Text>
           )}
           <Text>
-            Open: {selectedIndex === null ? "N/A" : data[selectedIndex].open.toFixed(2)}
+            Open:{" "}
+            {selectedIndex === null
+              ? "N/A"
+              : data[selectedIndex].open.toFixed(2)}
           </Text>
           <Text>
-            High: {selectedIndex === null ? "N/A" : data[selectedIndex].high.toFixed(2)}
+            High:{" "}
+            {selectedIndex === null
+              ? "N/A"
+              : data[selectedIndex].high.toFixed(2)}
           </Text>
           <Text>
-            Low: {selectedIndex === null ? "N/A" : data[selectedIndex].low.toFixed(2)}
+            Low:{" "}
+            {selectedIndex === null
+              ? "N/A"
+              : data[selectedIndex].low.toFixed(2)}
           </Text>
           <Text>
-            Close: {selectedIndex === null ? "N/A" : data[selectedIndex].close.toFixed(2)}
+            Close:{" "}
+            {selectedIndex === null
+              ? "N/A"
+              : data[selectedIndex].close.toFixed(2)}
           </Text>
           <Text>
             Volume:{" "}
-            {selectedIndex === null ? "N/A" : data[selectedIndex].volume.toFixed(2)}
+            {selectedIndex === null
+              ? "N/A"
+              : data[selectedIndex].volume.toFixed(2)}
           </Text>
         </div>
         {keys.map((key, index) => (
