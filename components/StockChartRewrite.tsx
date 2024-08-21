@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import useMeasure from "react-use-measure";
 import { motion } from "framer-motion";
 import { Text } from "./primitives/text";
+import { useState } from "react";
 
 interface ChartData {
   date: string;
@@ -69,18 +70,14 @@ interface ChartInnerProps {
 }
 
 function ChartInner({ data, width, height }: ChartInnerProps) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
   let margin = {
     top: 10,
     right: 10,
     bottom: 30,
     left: 24,
   };
-
-  const startDay = new Date(data[0].date);
-  const endDay = new Date(data[data.length - 1].date);
-  const numDays = Math.ceil(
-    (endDay.getTime() - startDay.getTime()) / (1000 * 3600 * 24)
-  );
 
   const xScale = d3
     .scaleBand()
@@ -130,90 +127,127 @@ function ChartInner({ data, width, height }: ChartInnerProps) {
 
   return (
     <>
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="w-full h-auto"
-    >
-      {/* Y axis */}
-      {yScale.ticks(6).map((max) => (
-        <g
-          transform={`translate(0,${yScale(max)})`}
-          className="text-gray-800 dark:text-gray-400"
-          key={max}
-        >
-          <line
-            x1={margin.left + 5}
-            x2={width - margin.right}
-            stroke="currentColor"
-            strokeDasharray="1,3"
-          />
-          <text
-            alignmentBaseline="middle"
-            className="text-[10px]"
-            fill="currentColor"
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+        {/* Y axis */}
+        {yScale.ticks(6).map((max) => (
+          <g
+            transform={`translate(0,${yScale(max)})`}
+            className="text-gray-800 dark:text-gray-400"
+            key={max}
           >
-            {max}
-          </text>
-        </g>
-      ))}
-
-      {/* X axis */}
-      <g
-        transform={`translate(0,${height})`}
-        className="text-gray-800 dark:text-gray-400"
-      >
-        {visibleXTicks.map((tick, i) => (
-          <text
-            x={xScale(tick) || 0}
-            key={i}
-            alignmentBaseline="after-edge"
-            className="text-[10px]"
-            fill="currentColor"
-          >
-            {new Date(tick).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </text>
+            <line
+              x1={margin.left + 5}
+              x2={width - margin.right}
+              stroke="currentColor"
+              strokeDasharray="1,3"
+            />
+            <text
+              alignmentBaseline="middle"
+              className="text-[10px]"
+              fill="currentColor"
+            >
+              {max}
+            </text>
+          </g>
         ))}
-      </g>
-      
-      {/* Stacked bars */}
-      {series.map((singleSeries, j) => {
-        return singleSeries.map((d, i) => (
-          <motion.rect
-            // initial={false}
-            key={i}
-            initial={{ height: 0 }}
-            animate={{
-              height: yScale(d[0]) - yScale(d[1]),
-            }}
-            y={yScale(d[1])}
-            height={yScale(d[0]) - yScale(d[1])}
-            x={xScale(data[i].date) || 0}
-            width={xScale.bandwidth()}
-            transition={{
-              duration: 0.5,
-              delay: i * 0.01 + j,
-              type: "tween",
-            }}
-            fill={colors[j]}
-          />
-        ));
-      })}
-    </svg>
 
-    {/* Legend */}
-    <div className="flex items-center gap-2 w-full justify-end mt-4">
-      {keys.map((key, index) => (
-        <div key={key} className="flex items-center gap-2">
-        <div
-          className="w-4 h-4"
-          style={{ backgroundColor: colors[index] }}
-        ></div>
-        <Text>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+        {/* X axis */}
+        <g
+          transform={`translate(0,${height})`}
+          className="text-gray-800 dark:text-gray-400"
+        >
+          {visibleXTicks.map((tick, i) => (
+            <text
+              x={xScale(tick) || 0}
+              key={i}
+              alignmentBaseline="after-edge"
+              className="text-[10px]"
+              fill="currentColor"
+            >
+              {new Date(tick).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </text>
+          ))}
+        </g>
+
+        {/* Stacked bars */}
+        {series.map((singleSeries, j) => (
+          <motion.g key={j}>
+            {singleSeries.map((d, i) => (
+              <motion.rect
+                key={i}
+                initial={{ height: 0 }}
+                animate={{
+                  height: yScale(d[0]) - yScale(d[1]),
+                }}
+                y={yScale(d[1])}
+                height={yScale(d[0]) - yScale(d[1])}
+                x={xScale(data[i].date) || 0}
+                width={xScale.bandwidth()}
+                transition={{
+                  duration: 0.5,
+                  delay: j * 0.3 + i * 0.01,
+                  type: "tween",
+                }}
+                fill={colors[j]}
+                onHoverStart={() => setSelectedIndex(i)}
+                // whileHover={j === 0 ? {
+                //   fill: "white",
+                //   transition: {
+                //     duration: 0,
+                //     delay: 0,
+                //     type: "tween",
+                //   },
+                // } : {}}
+              />
+            ))}
+          </motion.g>
+        ))}
+      </svg>
+
+      {/* Legend */}
+      <div className="flex items-center gap-2 w-full justify-between mt-6">
+        <div className="w-full flex gap-4 items-center">
+          {selectedIndex === null ? (
+            <Text>Selected Date: N/A</Text>
+          ) : (
+            <Text>
+              Selected Date:{" "}
+              {new Date(data[selectedIndex].date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </Text>
+          )}
+          <Text>
+            Open: {selectedIndex === null ? "N/A" : data[selectedIndex].open.toFixed(2)}
+          </Text>
+          <Text>
+            High: {selectedIndex === null ? "N/A" : data[selectedIndex].high.toFixed(2)}
+          </Text>
+          <Text>
+            Low: {selectedIndex === null ? "N/A" : data[selectedIndex].low.toFixed(2)}
+          </Text>
+          <Text>
+            Close: {selectedIndex === null ? "N/A" : data[selectedIndex].close.toFixed(2)}
+          </Text>
+          <Text>
+            Volume:{" "}
+            {selectedIndex === null ? "N/A" : data[selectedIndex].volume.toFixed(2)}
+          </Text>
         </div>
-      ))}
+        {keys.map((key, index) => (
+          <div key={key} className="flex items-center gap-2">
+            <div
+              className="w-4 h-4"
+              style={{ backgroundColor: colors[index] }}
+            ></div>
+            <Text>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+          </div>
+        ))}
       </div>
     </>
   );
