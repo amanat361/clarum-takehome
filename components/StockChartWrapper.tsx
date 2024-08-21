@@ -19,6 +19,7 @@ import {
 } from "@/components/primitives/dialog";
 import { Button } from "./primitives/button";
 import { Heading } from "./primitives/heading";
+import Chart from "./StockChartRewrite";
 
 interface StockChartWrapperProps {
   timeSeries: { [date: string]: TimeSeriesData };
@@ -40,7 +41,7 @@ const StockChartWrapper: React.FC<StockChartWrapperProps> = ({
       open: parseFloat(timeSeries[date]["1. open"]),
       close: parseFloat(timeSeries[date]["4. close"]),
       volume: parseFloat(timeSeries[date]["5. volume"]),
-    }));
+    })).reverse();
 
   // Helper function to format data for mini charts
   const formatMiniChartData = (points: number) =>
@@ -77,13 +78,14 @@ const StockChartWrapper: React.FC<StockChartWrapperProps> = ({
         ))}
       </div>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)} size="3xl">
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} size="5xl">
         <DialogTitle>Stock Chart</DialogTitle>
         <DialogDescription>
           View the stock chart for the last {numPoints} data points.
         </DialogDescription>
-        <DialogBody>
-          <StockChart data={formattedData} />
+        <DialogBody className="mb-20">
+          <Chart data={formattedData} />
+          {/* <StockChart data={formattedData} /> */}
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpen(false)}>

@@ -251,12 +251,6 @@ function ChartInner({ deleteDataPoint, data, width, height }: ChartInnerProps) {
               ? "N/A"
               : data[selectedIndex].close.toFixed(2)}
           </Text>
-          <Text>
-            Volume:{" "}
-            {selectedIndex === null
-              ? "N/A"
-              : data[selectedIndex].volume.toFixed(2)}
-          </Text>
         </div>
         {keys.map((key, index) => (
           <div key={key} className="flex items-center gap-2">
